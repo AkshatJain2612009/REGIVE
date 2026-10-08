@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReGive | Reduce Waste, Share Resources</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        
+        /* Leaflet Map styling */
+        #map { height: 100%; width: 100%; z-index: 1; }
+        .leaflet-container { border-radius: 1.5rem; }
+
+        /* Custom Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        
+        .section-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed w-full z-[1000] glass border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="showSection('home')">
+            <div class="bg-emerald-500 p-2 rounded-lg">
+                <i class="fa-solid fa-recycle text-white text-xl"></i>
+            </div>
+            <span class="text-2xl font-bold tracking-tight text-emerald-600">ReGive</span>
+        </div>
+        <div class="hidden md:flex gap-8 font-medium text-slate-600">
+            <a href="javascript:void(0)" onclick="showSection('home')" class="hover:text-emerald-500 transition">Home</a>
+            <a href="javascript:void(0)" onclick="showSection('explore')" class="hover:text-emerald-500 transition">Explore Map</a>
+            <a href="javascript:void(0)" onclick="showSection('how-it-works-sec')" class="hover:text-emerald-500 transition">How it Works</a>
+        </div>
+        <button onclick="showSection('donate')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full font-semibold transition shadow-lg shadow-emerald-200">
+            Give Something
+        </button>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="pt-32 pb-20 px-6 text-center max-w-5xl mx-auto animate-fade-in">
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight">
+            Turn your <span class="text-emerald-500 relative">surplus<span class="absolute -bottom-2 left-0 w-full h-2 bg-emerald-200/50 rounded-full"></span></span> into <span class="text-emerald-500 relative">someone's resource.<span class="absolute -bottom-2 left-0 w-full h-2 bg-emerald-200/50 rounded-full"></span></span>
+        </h1>
+        <p class="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+            ReGive connects individuals, restaurants, and businesses with NGOs to ensure usable items and surplus food reach those who need them most.
+        </p>
+        
+        <!-- IMPACT STATS BAR -->
+        <div id="impact-stats" class="mb-12 p-6 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-3xl mx-auto animate-fade-in">
+            <!-- Stats injected by JS -->
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+            <button onclick="showSection('explore')" class="group relative bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 transition-all duration-300 shadow-xl hover:shadow-slate-300 overflow-hidden">
+                <span class="relative z-10">Find Donations Near Me</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button onclick="showSection('donate')" class="bg-white border-2 border-slate-200 px-8 py-4 rounded-2xl font-bold text-lg hover:border-emerald-500 hover:text-emerald-600 transition-all duration-300">
+                Start Donating
+            </button>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works-sec" class="py-20 bg-white px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-16">How ReGive Works</h2>
+            <div class="grid md:grid-cols-3 gap-12 text-center">
+                <div class="p-6 group hover:bg-emerald-50 rounded-3xl transition duration-300">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">1. Pin & List</h3>
+                    <p class="text-slate-600">Users pin their location and list items like clothes, books, or surplus food.</p>
+                </div>
+                <div class="p-6 group hover:bg-emerald-50 rounded-3xl transition duration-300">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">2. NGO Match</h3>
+                    <p class="text-slate-600">Verified NGOs see the listings in real-time and claim the items.</p>
+                </div>
+                <div class="p-6 group hover:bg-emerald-50 rounded-3xl transition duration-300">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">3. Collect & Distribute</h3>
+                    <p class="text-slate-600">Resources are collected and delivered to families in need, reducing waste.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXPLORE SECTION (The "App" Part) -->
+    <section id="explore" class="hidden py-20 px-6 bg-slate-100 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-4xl font-bold">Resource Map</h2>
+                    <p class="text-slate-600">Real-time usable items available in your area.</p>
+                </div>
+                <button onclick="showSection('home')" class="text-emerald-600 font-semibold">← Back to Home</button>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Actual Interactive Map -->
+                <div class="lg:col-span-2 h-[600px] rounded-3xl border-4 border-white shadow-xl overflow-hidden relative">
+                    <div id="map"></div>
+                </div>
+
+                <!-- Listings Side-panel -->
+                <div class="space-y-4 overflow-y-auto h-[600px] pr-2">
+                    <h3 class="text-xl font-bold mb-4">Nearby Listings</h3>
+                    <div id="listings-container" class="space-y-4">
+                        <!-- Default Items -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center hover:border-emerald-400 transition cursor-pointer">
+                            <div class="flex-1">
+                                <h4 class="font-bold">Fresh Bagels (10kg)</h4>
+                                <p class="text-xs text-slate-500">Bakery • 0.4 miles away</p>
+                            </div>
+                            <button onclick="claimItem(this)" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-600 transition">Claim</button>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center hover:border-emerald-400 transition cursor-pointer">
+                            <div class="flex-1">
+                                <h4 class="font-bold">Kids' Clothing</h4>
+                                <p class="text-xs text-slate-500">Individual • 1.1 miles away</p>
+                            </div>
+                            <button onclick="claimItem(this)" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-600 transition">Claim</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DONATE SECTION -->
+    <section id="donate" class="hidden py-20 px-6 bg-emerald-50 min-h-screen">
+        <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-xl border border-emerald-100">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold">List a Donation</h2>
+                <p class="text-slate-600">Help us reduce waste by sharing your usable items.</p>
+            </div>
+            <form id="donationForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Item Description</label>
+                    <input type="text" id="itemName" required placeholder="e.g. 5 boxes of school supplies" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Category</label>
+                        <select id="itemCat" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option>Food</option>
+                            <option>Clothing</option>
+                            <option>Furniture</option>
+                            <option>Books/Edu</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Condition</label>
+                        <select class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option>New</option>
+                            <option>Gently Used</option>
+                            <option>Surplus (Food)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Pickup Location</label>
+                    <div class="flex gap-2">
+                        <input type="text" value="Current GPS Location" disabled class="w-full p-3 bg-slate-100 border rounded-xl text-slate-500">
+                        <button type="button" class="bg-slate-200 px-4 rounded-xl"><i class="fa-solid fa-location-crosshairs"></i></button>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-emerald-600 transition shadow-lg shadow-emerald-200">
+                    Post Listing
+                </button>
+                <button type="button" onclick="showSection('home')" class="w-full text-slate-500 py-2 text-sm">Cancel</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-10 text-center text-slate-500 border-t border-slate-200">
+        <p>© 2023 ReGive Project. Built for a Sustainable Future.</p>
+    </footer>
+
+    <script>
+        let map;
+        let markers = [];
+        let donationCount = 0;
+        let claimCount = 0;
+
+        // Initialize impact stats
+        function updateStats() {
+            const statsContainer = document.getElementById('impact-stats');
+            if (statsContainer) {
+                statsContainer.innerHTML = `
+                    <div class="flex gap-8 justify-center">
+                        <div class="text-center">
+                            <span class="block text-3xl font-bold text-emerald-600">${donationCount + 3}</span>
+                            <span class="text-xs text-slate-500 uppercase tracking-wider">Items Shared</span>
+                        </div>
+                        <div class="text-center border-x border-slate-200 px-8">
+                            <span class="block text-3xl font-bold text-emerald-600">${claimCount}</span>
+                            <span class="text-xs text-slate-500 uppercase tracking-wider">Lives Impacted</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-3xl font-bold text-emerald-600">${((donationCount + 3) * 1.2).toFixed(1)}kg</span>
+                            <span class="text-xs text-slate-500 uppercase tracking-wider">Waste Reduced</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function initMap() {
+            // Initialize map centered on Mumbai, India
+            map = L.map('map').setView([19.0760, 72.8777], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add some initial mock markers around Mumbai
+            addMarker(19.0760, 72.8777, "Fresh Bagels (10kg)", "Bakery");
+            addMarker(19.0850, 72.8900, "Kids' Clothing", "Individual");
+            addMarker(19.0600, 72.8500, "Winter Coats", "Sarah J.");
+        }
+
+        function addMarker(lat, lng, title, category) {
+            const marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup(`<div class="p-2"><b class="text-emerald-600">${title}</b><br><span class="text-slate-500 text-xs">${category}</span></div>`);
+            markers.push(marker);
+        }
+
+        function showSection(id) {
+            // Hide all
+            document.getElementById('home').classList.add('hidden');
+            document.getElementById('explore').classList.add('hidden');
+            document.getElementById('donate').classList.add('hidden');
+            document.getElementById('how-it-works-sec').classList.add('hidden');
+            
+            // Show target
+            const target = document.getElementById(id);
+            target.classList.remove('hidden');
+            target.classList.add('animate-fade-in');
+            window.scrollTo(0,0);
+
+            // Re-init map if explore section is shown
+            if (id === 'explore') {
+                setTimeout(() => {
+                    if (!map) {
+                        initMap();
+                    } else {
+                        map.invalidateSize();
+                    }
+                }, 100);
+            }
+        }
+
+        function claimItem(btn) {
+            btn.innerText = "Claimed!";
+            btn.classList.remove('bg-emerald-500');
+            btn.classList.add('bg-slate-400');
+            btn.disabled = true;
+            
+            claimCount++;
+            updateStats();
+            
+            alert("Request sent to the donor! You will be notified when they accept.");
+        }
+
+        document.getElementById('donationForm').onsubmit = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('itemName').value;
+            const cat = document.getElementById('itemCat').value;
+
+            // Add to list
+            const container = document.getElementById('listings-container');
+            const div = document.createElement('div');
+            div.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center animate-pulse hover:border-emerald-400 transition cursor-pointer";
+            div.innerHTML = `
+                <div class="flex-1">
+                    <h4 class="font-bold">${name}</h4>
+                    <p class="text-xs text-slate-500">${cat} • Just now</p>
+                </div>
+                <button onclick="claimItem(this)" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-600 transition">Claim</button>
+            `;
+            container.prepend(div);
+            
+            // Add to map randomly near Mumbai
+            const lat = 19.0760 + (Math.random() - 0.5) * 0.05;
+            const lng = 72.8777 + (Math.random() - 0.5) * 0.05;
+            addMarker(lat, lng, name, cat);
+
+            donationCount++;
+            updateStats();
+
+            alert("Item listed successfully! It is now visible on the map.");
+            showSection('explore');
+        }
+
+        // Initialize stats on load
+        window.onload = updateStats;
+    </script>
+</body>
+</html>
