@@ -2,9 +2,6 @@
 
 ReGive is a community-driven platform designed to bridge the gap between surplus resources and those who need them most. By connecting individuals, businesses, and restaurants with verified NGOs, ReGive ensures that usable items—from surplus food to clothing and educational materials—do not go to waste.
 
-![License](https://img.shields.io/badge/license-MIT-green)
-![Platform](https://img.shields.io/badge/platform-Web-blue)
-![UI-Framework](https://img.shields.io/badge/UI-TailwindCSS-38B2AC)
 
 ## ✨ Key Features
 
